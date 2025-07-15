@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  dagster:
+    image: dagster/dagster:1.7.16
+    command: dagster dev -h 0.0.0.0 -p 3000
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./dagster:/opt/dagster/app
+    depends_on:
+      - db
+volumes:
+  pgdata:
